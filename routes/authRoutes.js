@@ -1,6 +1,78 @@
-// Auth Routes
-// Handles authentication endpoints
-// POST /register - Create new user account
-// POST /login - Authenticate user and return token
-// POST /logout - Clear auth cookie
-// GET /me - Get current user profile
+const express = require("express");
+const passport = require("passport");
+const router = express.Router();
+const {
+  register,
+  login,
+  getMe,
+  logout,
+  updateProfile,
+} = require("../controllers/authController");
+const { protect } = require("../middleware/auth");
+
+// @desc    Register user
+// @route   POST /api/auth/register
+// @access  Public
+router.post("/register", register);
+
+// @desc    Login user
+// @route   POST /api/auth/login
+// @access  Public
+router.post("/login", login);
+
+// @desc    Get current user
+// @route   GET /api/auth/me
+// @access  Private
+router.get("/me", protect, getMe);
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+router.put("/profile", protect, updateProfile);
+
+// @desc    Logout user
+// @route   POST /api/auth/logout
+// @access  Private
+router.post("/logout", protect, logout);
+
+// @desc    Google OAuth routes
+// @route   GET /api/auth/google
+// @access  Public
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+// @desc    Google OAuth callback
+// @route   GET /api/auth/google/callback
+// @access  Public
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  (req, res) => {
+    // Redirect to frontend after successful Google auth
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    res.redirect(`${frontendUrl}/auth/google/success`);
+  }
+);
+
+// @desc    Google OAuth success (for frontend to get token)
+// @route   GET /api/auth/google/success
+// @access  Public (but requires session)
+router.get(
+  "/google/success",
+  passport.authenticate("google", { session: false }),
+  (req, res) => {
+    const jwt = require("jsonwebtoken");
+    const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRE || "30d",
+    });
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
+  }
+);
+
+module.exports = router;
