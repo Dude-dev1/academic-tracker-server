@@ -44,7 +44,7 @@ exports.checkAssignmentCountBadges = async (userId) => {
 };
 
 // Check and award badges based on streak days
-exports.checkStreakBadges = asyncHandler(async (userId) => {
+exports.checkStreakBadges = async (userId) => {
   // Get all badges for streak criteria
   const streakBadges = await Badge.find({
     criteria_type: "streak_days",
@@ -76,11 +76,11 @@ exports.checkStreakBadges = asyncHandler(async (userId) => {
   }
 
   return newlyEarnedBadges;
-});
+};
 
 // Check and award badges based on class attendance
 // Note: Since there's no explicit attendance tracking, we'll use class membership as a proxy
-exports.checkClassAttendanceBadges = asyncHandler(async (userId) => {
+exports.checkClassAttendanceBadges = async (userId) => {
   // Get all badges for class attendance criteria
   const attendanceBadges = await Badge.find({
     criteria_type: "class_attendance",
@@ -112,7 +112,7 @@ exports.checkClassAttendanceBadges = asyncHandler(async (userId) => {
   }
 
   return newlyEarnedBadges;
-});
+};
 
 // Helper function to calculate current streak based on task completion dates
 async function calculateCurrentStreak(userId) {
@@ -157,10 +157,10 @@ async function calculateCurrentStreak(userId) {
 }
 
 // Main function to check all badge types for a user
-exports.checkAllBadgesForUser = asyncHandler(async (userId) => {
+exports.checkAllBadgesForUser = async (userId) => {
   const assignmentBadges = await this.checkAssignmentCountBadges(userId);
   const streakBadges = await this.checkStreakBadges(userId);
   const attendanceBadges = await this.checkClassAttendanceBadges(userId);
 
   return [...assignmentBadges, ...streakBadges, ...attendanceBadges];
-});
+};
