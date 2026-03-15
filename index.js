@@ -51,6 +51,7 @@ const userRoutes = require("./routes/userRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const badgeRoutes = require("./routes/badgeRoutes");
 
 const app = express();
 
@@ -84,6 +85,7 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/badges", badgeRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

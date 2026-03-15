@@ -263,9 +263,17 @@ exports.joinClass = async (req, res) => {
       $push: { classes: classItem.id },
     });
 
+    // Check for new badges after joining class
+    const badgeService = require("../services/badgeService");
+    const newlyEarnedBadges = await badgeService.checkAllBadgesForUser(
+      req.user.id
+    );
+
     res.status(200).json({
       success: true,
+      message: "Joined class successfully",
       data: classItem.toJSON(),
+      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge.toJSON()),
     });
   } catch (error) {
     res.status(500).json({
@@ -308,9 +316,17 @@ exports.joinClassByCode = async (req, res) => {
       $push: { classes: classItem.id },
     });
 
+    // Check for new badges after joining class by code
+    const badgeService = require("../services/badgeService");
+    const newlyEarnedBadges = await badgeService.checkAllBadgesForUser(
+      req.user.id
+    );
+
     res.status(200).json({
       success: true,
+      message: "Joined class successfully",
       data: classItem.toJSON(),
+      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge.toJSON()),
     });
   } catch (error) {
     res.status(500).json({
@@ -353,9 +369,16 @@ exports.leaveClass = async (req, res) => {
       $pull: { classes: classItem.id },
     });
 
+    // Check for new badges after leaving class
+    const badgeService = require("../services/badgeService");
+    const newlyEarnedBadges = await badgeService.checkAllBadgesForUser(
+      req.user.id
+    );
+
     res.status(200).json({
       success: true,
       message: "Left class successfully",
+      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge.toJSON()),
     });
   } catch (error) {
     res.status(500).json({

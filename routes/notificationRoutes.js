@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const asyncHandler = require("../utils/asyncHandler");
 const {
   getNotifications,
   markAsRead,
@@ -14,16 +13,16 @@ router.use(protect);
 // @desc    Get user's notifications
 // @route   GET /api/notifications
 // @access  Private
-router.get("/", asyncHandler(getNotifications));
+router.get("/", getNotifications);
 
 // @desc    Mark all as read
 // @route   PATCH /api/notifications/read-all
 // @access  Private
-router.patch("/read-all", asyncHandler(markAllAsRead));
+router.patch("/read-all", markAllAsRead);
 
 // @desc    Mark notification as read
 // @route   PATCH /api/notifications/:id/read
 // @access  Private
-router.patch("/:id/read", asyncHandler(markAsRead));
+router.patch("/:id/read", markAsRead);
 
 module.exports = router;

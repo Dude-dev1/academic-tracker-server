@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema(
         ref: "Class",
       },
     ],
+    badges: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Badge",
+      },
+    ],
   },
   {
     timestamps: true,

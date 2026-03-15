@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const asyncHandler = require("../utils/asyncHandler");
 const {
   createAssignment,
   getAssignments,
@@ -16,26 +15,26 @@ router.use(protect);
 // @route   POST /api/assignments
 // @desc    Create a new assignment
 // @access  Private (instructor only)
-router.post("/", instructorOnly, asyncHandler(createAssignment));
+router.post("/", instructorOnly, createAssignment);
 
 // @route   GET /api/assignments
 // @desc    Get all assignments
 // @access  Private
-router.get("/", asyncHandler(getAssignments));
+router.get("/", getAssignments);
 
 // @route   GET /api/assignments/:id
 // @desc    Get single assignment
 // @access  Private
-router.get("/:id", asyncHandler(getAssignment));
+router.get("/:id", getAssignment);
 
 // @route   PUT /api/assignments/:id
 // @desc    Update assignment
 // @access  Private (instructor only)
-router.put("/:id", instructorOnly, asyncHandler(updateAssignment));
+router.put("/:id", instructorOnly, updateAssignment);
 
 // @route   DELETE /api/assignments/:id
 // @desc    Delete assignment
 // @access  Private (instructor only)
-router.delete("/:id", instructorOnly, asyncHandler(deleteAssignment));
+router.delete("/:id", instructorOnly, deleteAssignment);
 
 module.exports = router;

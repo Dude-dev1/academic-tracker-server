@@ -203,9 +203,17 @@ exports.completeTask = async (req, res) => {
     task.completed = true;
     await task.save();
 
+    // Check for new badges after task completion
+    const badgeService = require("../services/badgeService");
+    const newlyEarnedBadges = await badgeService.checkAllBadgesForUser(
+      req.user.id
+    );
+
     res.status(200).json({
       success: true,
+      message: "Task completed successfully",
       data: task.toJSON(),
+      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge.toJSON()),
     });
   } catch (error) {
     res.status(500).json({
