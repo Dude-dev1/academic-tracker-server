@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const passport = require("passport");
+const http = require("http");
+const socketIo = require("socket.io");
 const connectDB = require("./config/db");
 // Error handler - must have 4 params for Express to recognize it as error handler
 // eslint-disable-next-line no-unused-vars
@@ -48,7 +50,7 @@ const assignmentRoutes = require("./routes/assignmentRoutes");
 const userRoutes = require("./routes/userRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-const submissionRoutes = require("./routes/submissionRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
 
@@ -79,7 +81,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/assignments", assignmentRoutes);
-app.use("/api/submissions", submissionRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/notifications", notificationRoutes);
 
@@ -105,7 +107,168 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
+// Create HTTP server and Socket.IO instance
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  },
+});
+
+// Store active connections
+const classConnections = {};
+
+// Socket.IO middleware to authenticate users
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error("Authentication error: No token provided"));
+  }
+  // Token validation can be added here if needed
+  next();
+});
+
+// Socket.IO event handlers
+io.on("connection", (socket) => {
+  console.log(`User connected: ${socket.id}`);
+
+  // User joins a class chat room
+  socket.on("joinClass", (data) => {
+    const { classId, userId, userName } = data;
+    socket.join(`class_${classId}`);
+
+    if (!classConnections[classId]) {
+      classConnections[classId] = [];
+    }
+    classConnections[classId].push({ socketId: socket.id, userId, userName });
+
+    // Notify others in the class
+    io.to(`class_${classId}`).emit("userJoined", {
+      userId,
+      userName,
+      message: `${userName} joined the chat`,
+      timestamp: new Date(),
+    });
+
+    console.log(`User ${userName} joined class ${classId}`);
+  });
+
+  // Handle incoming chat messages
+  socket.on("sendMessage", async (data) => {
+    const { classId, userId, userName, message } = data;
+
+    try {
+      const Chat = require("./models/Chat");
+
+      // Save message to database
+      const newMessage = await Chat.create({
+        classId,
+        userId,
+        userName,
+        message,
+      });
+
+      // Broadcast to all users in the class
+      io.to(`class_${classId}`).emit("receiveMessage", {
+        _id: newMessage._id,
+        userId,
+        userName,
+        message,
+        createdAt: newMessage.createdAt,
+        isEdited: false,
+      });
+    } catch (error) {
+      console.error("Error saving message:", error);
+      socket.emit("error", { message: "Failed to save message" });
+    }
+  });
+
+  // Handle message editing
+  socket.on("editMessage", async (data) => {
+    const { classId, messageId, userId, newMessage } = data;
+
+    try {
+      const Chat = require("./models/Chat");
+
+      const message = await Chat.findByIdAndUpdate(
+        messageId,
+        {
+          message: newMessage,
+          isEdited: true,
+          editedAt: new Date(),
+        },
+        { new: true }
+      );
+
+      // Broadcast edited message to all users in the class
+      io.to(`class_${classId}`).emit("messageEdited", {
+        _id: message._id,
+        message: message.message,
+        isEdited: true,
+        editedAt: message.editedAt,
+      });
+    } catch (error) {
+      console.error("Error editing message:", error);
+      socket.emit("error", { message: "Failed to edit message" });
+    }
+  });
+
+  // Handle message deletion
+  socket.on("deleteMessage", async (data) => {
+    const { classId, messageId } = data;
+
+    try {
+      const Chat = require("./models/Chat");
+      await Chat.findByIdAndDelete(messageId);
+
+      // Broadcast deletion to all users in the class
+      io.to(`class_${classId}`).emit("messageDeleted", { messageId });
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      socket.emit("error", { message: "Failed to delete message" });
+    }
+  });
+
+  // User leaves a class chat room
+  socket.on("leaveClass", (data) => {
+    const { classId, userId, userName } = data;
+    socket.leave(`class_${classId}`);
+
+    if (classConnections[classId]) {
+      classConnections[classId] = classConnections[classId].filter(
+        (conn) => conn.socketId !== socket.id
+      );
+    }
+
+    io.to(`class_${classId}`).emit("userLeft", {
+      userId,
+      userName,
+      message: `${userName} left the chat`,
+      timestamp: new Date(),
+    });
+
+    console.log(`User ${userName} left class ${classId}`);
+  });
+
+  // Handle disconnect
+  socket.on("disconnect", () => {
+    console.log(`User disconnected: ${socket.id}`);
+
+    // Clean up connections
+    for (const classId in classConnections) {
+      classConnections[classId] = classConnections[classId].filter(
+        (conn) => conn.socketId !== socket.id
+      );
+    }
+  });
+
+  socket.on("error", (error) => {
+    console.error(`Socket error for ${socket.id}:`, error);
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
