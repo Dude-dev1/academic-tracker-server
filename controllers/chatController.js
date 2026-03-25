@@ -70,10 +70,10 @@ exports.deleteMessage = async (req, res) => {
       });
     }
 
-    // Only message owner or admin can delete
+    // Only message owner or instructor can delete
     if (
       message.userId.toString() !== req.user.id &&
-      req.user.role !== "admin"
+      req.user.role !== "instructor"
     ) {
       return res.status(403).json({
         success: false,
