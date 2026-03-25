@@ -53,7 +53,7 @@ router.get(
   passport.authenticate("google", { failureRedirect: "/" }),
   (req, res) => {
     // Redirect to frontend after successful Google auth
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendUrl}/auth/google/success`);
   }
 );
@@ -70,7 +70,7 @@ router.get(
       expiresIn: process.env.JWT_EXPIRE || "30d",
     });
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
   }
 );
