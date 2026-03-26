@@ -34,10 +34,6 @@ const notificationSchema = new mongoose.Schema(
   }
 );
 
-// Index for faster queries
-notificationSchema.index({ userId: 1 });
-notificationSchema.index({ read: 1 });
-
 const Notification = mongoose.model("Notification", notificationSchema);
 
 module.exports = Notification;

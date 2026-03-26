@@ -42,6 +42,7 @@ router.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
+    session: false
   })
 );
 
@@ -50,20 +51,7 @@ router.get(
 // @access  Public
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/" }),
-  (req, res) => {
-    // Redirect to frontend after successful Google auth
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    res.redirect(`${frontendUrl}/auth/google/success`);
-  }
-);
-
-// @desc    Google OAuth success (for frontend to get token)
-// @route   GET /api/auth/google/success
-// @access  Public (but requires session)
-router.get(
-  "/google/success",
-  passport.authenticate("google", { session: false }),
+  passport.authenticate("google", { failureRedirect: (process.env.FRONTEND_URL || "http://localhost:5173") + "/login", session: false }),
   (req, res) => {
     const jwt = require("jsonwebtoken");
     const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET, {
@@ -71,7 +59,7 @@ router.get(
     });
 
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
+    res.redirect(`${frontendUrl}/google-callback?token=${token}`);
   }
 );
 

@@ -1,0 +1,19 @@
+const express = require("express");
+const {
+  getEvents,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+} = require("../controllers/calendarEventController");
+
+const router = express.Router();
+
+const { protect } = require("../middleware/auth");
+
+router.use(protect);
+
+router.route("/").get(getEvents).post(createEvent);
+
+router.route("/:id").put(updateEvent).delete(deleteEvent);
+
+module.exports = router;

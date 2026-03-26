@@ -36,10 +36,6 @@ const chatSchema = new mongoose.Schema(
   }
 );
 
-// Index for faster queries
-chatSchema.index({ classId: 1, createdAt: -1 });
-chatSchema.index({ userId: 1 });
-
 const Chat = mongoose.model("Chat", chatSchema);
 
 module.exports = Chat;

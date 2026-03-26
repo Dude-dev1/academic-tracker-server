@@ -53,6 +53,8 @@ const taskRoutes = require("./routes/taskRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const badgeRoutes = require("./routes/badgeRoutes");
+const calendarEventRoutes = require("./routes/calendarEventRoutes");
+const announcementRoutes = require("./routes/announcementRoutes");
 
 const app = express();
 
@@ -88,6 +90,8 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/badges", badgeRoutes);
+app.use("/api/calendar-events", calendarEventRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

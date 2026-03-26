@@ -16,10 +16,25 @@ const assignmentSchema = new mongoose.Schema(
       type: Date,
       required: [true, "Due date is required"],
     },
-    classId: {
+    courseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Class",
-      required: [true, "Class is required"],
+      ref: "Course",
+      required: false,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
+    group: {
+      type: String,
+      enum: ["All", "Group 1", "Group 2"],
+      default: "All",
+    },
+    status: {
+      type: String,
+      enum: ["open", "closed", "overdue"],
+      default: "open",
     },
     points: {
       type: Number,
@@ -31,10 +46,6 @@ const assignmentSchema = new mongoose.Schema(
     timestamps: true, // This still adds createdAt and updatedAt automatically
   }
 );
-
-// Keep these indexes - they're good for performance
-assignmentSchema.index({ classId: 1 });
-assignmentSchema.index({ dueDate: 1 });
 
 const Assignment = mongoose.model("Assignment", assignmentSchema);
 

@@ -1,36 +1,39 @@
 const Assignment = require("../models/Assignment");
-const Class = require("../models/Class");
+const Course = require("../models/Course");
 
 // @desc    Create a new assignment
 // @route   POST /api/assignments
-// @access  Private (instructor only)
+// @access  Private
 exports.createAssignment = async (req, res) => {
   try {
-    const { title, description, dueDate, classId, points } = req.body;
+    const { title, description, dueDate, courseId, points, group } = req.body;
 
-    // Verify class exists and user is the instructor
-    const classItem = await Class.findById(classId);
-
-    if (!classItem) {
-      return res.status(404).json({
-        success: false,
-        message: "Class not found",
-      });
-    }
-
-    if (classItem.instructorId.toString() !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: "Only the class instructor can create assignments",
-      });
+    // If a courseId is provided, check if the user is the instructor
+    if (courseId) {
+      const courseItem = await Course.findById(courseId);
+      if (!courseItem) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
+      }
+      if (courseItem.instructorId.toString() !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          message: "Only the course instructor can create course assignments",
+        });
+      }
     }
 
     const assignment = await Assignment.create({
       title,
       description,
       dueDate,
-      classId,
+      courseId: courseId || undefined,
+      userId: courseId ? undefined : req.user.id,
       points: points || 100,
+      group: group || "All",
+      status: "open"
     });
 
     res.status(201).json({
@@ -50,26 +53,40 @@ exports.createAssignment = async (req, res) => {
 // @access  Private
 exports.getAssignments = async (req, res) => {
   try {
-    const { classId } = req.query;
+    const { courseId } = req.query;
     let query = {};
 
-    // If user is student, get assignments from their classes
-    if (req.user.role === "student") {
-      const userClasses = await Class.find({ members: req.user.id });
-      const classIds = userClasses.map((c) => c._id);
-      query.classId = { $in: classIds };
-    } else if (classId) {
-      // Instructors can filter by classId
-      query.classId = classId;
+    if (courseId) {
+      query.courseId = courseId;
     } else {
-      // Get all classes taught by instructor
-      const instructorClasses = await Class.find({ instructorId: req.user.id });
-      const classIds = instructorClasses.map((c) => c._id);
-      query.classId = { $in: classIds };
+      // If no courseId is queried, return personal assignments AND courses the user is in.
+      // Wait, Course model has no "members". So if a student fetches assignments, maybe they fetch all courses?
+      if (req.user.role === "student") {
+        // Students can see personal, or all course assignments? Or enrolled ones?
+        // Since there is no enroll logic on Course directly, maybe we just return all course assignments for now
+        // or whatever belongs to courses.
+        query = {
+          $or: [
+            { userId: req.user.id },
+            { courseId: { $exists: true } }
+          ]
+        };
+      } else if (req.user.role === "instructor") {
+        const instructorCourses = await Course.find({ instructorId: req.user.id });
+        const courseIds = instructorCourses.map((c) => c._id);
+        query = {
+          $or: [
+            { userId: req.user.id },
+            { courseId: { $in: courseIds } }
+          ]
+        };
+      } else {
+        query.userId = req.user.id;
+      }
     }
 
     const assignments = await Assignment.find(query)
-      .populate("classId", "name code")
+      .populate("courseId", "name code")
       .sort({ dueDate: 1 });
 
     res.status(200).json({
@@ -90,8 +107,8 @@ exports.getAssignments = async (req, res) => {
 // @access  Private
 exports.getAssignment = async (req, res) => {
   try {
-    const assignment = await Assignment.findById(req.params.id).populate(
-      "classId",
+    const assignment = await Assignment.findById(req.params.id).populate(       
+      "courseId",
       "name code instructorId"
     );
 
@@ -102,16 +119,24 @@ exports.getAssignment = async (req, res) => {
       });
     }
 
-    // Check if user is a member of the class or the instructor
-    const classItem = assignment.classId;
-    const isMember = classItem.members?.includes(req.user.id);
-    const isInstructor = classItem.instructorId.toString() === req.user.id;
+    // Check if user is a member of the course or the instructor, OR if it's their personal assignment
+    if (assignment.userId && assignment.userId.toString() !== req.user.id) {
+        return res.status(403).json({
+            success: false,
+            message: "You are not authorized to view this personal assignment",
+          });
+    }
 
-    if (!isMember && !isInstructor && req.user.role !== "instructor") {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to view this assignment",
-      });
+    if (assignment.courseId) {
+        const courseItem = assignment.courseId;
+        const isInstructor = courseItem.instructorId.toString() === req.user.id;     
+
+        if (!isInstructor && req.user.role !== "student" && req.user.role !== "admin") {
+        return res.status(403).json({
+            success: false,
+            message: "You are not authorized to view this course assignment",
+        });
+        }
     }
 
     res.status(200).json({
@@ -128,11 +153,11 @@ exports.getAssignment = async (req, res) => {
 
 // @desc    Update assignment
 // @route   PUT /api/assignments/:id
-// @access  Private (instructor only)
+// @access  Private
 exports.updateAssignment = async (req, res) => {
   try {
     let assignment = await Assignment.findById(req.params.id).populate(
-      "classId"
+      "courseId"
     );
 
     if (!assignment) {
@@ -142,19 +167,22 @@ exports.updateAssignment = async (req, res) => {
       });
     }
 
-    // Check if user is the class instructor
-    if (assignment.classId.instructorId.toString() !== req.user.id) {
+    if (assignment.userId && assignment.userId.toString() !== req.user.id) {
+       return res.status(403).json({ success: false, message: "Not authorized to update this personal assignment" });
+    }
+
+    if (assignment.courseId && assignment.courseId.instructorId.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
-        message: "Only the class instructor can update assignments",
+        message: "Only the course instructor can update assignments",
       });
     }
 
-    const { title, description, dueDate, points } = req.body;
+    const { title, description, dueDate, points, group, status } = req.body;
 
     assignment = await Assignment.findByIdAndUpdate(
       req.params.id,
-      { title, description, dueDate, points },
+      { title, description, dueDate, points, group, status },
       { new: true, runValidators: true }
     );
 
@@ -172,11 +200,11 @@ exports.updateAssignment = async (req, res) => {
 
 // @desc    Delete assignment
 // @route   DELETE /api/assignments/:id
-// @access  Private (instructor only)
+// @access  Private
 exports.deleteAssignment = async (req, res) => {
   try {
-    const assignment = await Assignment.findById(req.params.id).populate(
-      "classId"
+    const assignment = await Assignment.findById(req.params.id).populate(       
+      "courseId"
     );
 
     if (!assignment) {
@@ -186,11 +214,14 @@ exports.deleteAssignment = async (req, res) => {
       });
     }
 
-    // Check if user is the class instructor
-    if (assignment.classId.instructorId.toString() !== req.user.id) {
+    if (assignment.userId && assignment.userId.toString() !== req.user.id) {
+       return res.status(403).json({ success: false, message: "Not authorized to delete this personal assignment" });
+    }
+
+    if (assignment.courseId && assignment.courseId.instructorId.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
-        message: "Only the class instructor can delete assignments",
+        message: "Only the course instructor can delete course assignments",
       });
     }
 

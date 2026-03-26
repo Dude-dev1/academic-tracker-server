@@ -35,10 +35,6 @@ const taskSchema = new mongoose.Schema(
   }
 );
 
-// Index for faster queries
-taskSchema.index({ userId: 1 });
-taskSchema.index({ dueDate: 1 });
-
 const Task = mongoose.model("Task", taskSchema);
 
 module.exports = Task;

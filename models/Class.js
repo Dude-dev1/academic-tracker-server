@@ -36,10 +36,6 @@ const classSchema = new mongoose.Schema(
   }
 );
 
-// Index for faster queries
-classSchema.index({ code: 1 });
-classSchema.index({ instructorId: 1 });
-
 const Class = mongoose.model("Class", classSchema);
 
 module.exports = Class;

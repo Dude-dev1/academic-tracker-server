@@ -35,9 +35,6 @@ const courseSchema = new mongoose.Schema(
   }
 );
 
-courseSchema.index({ code: 1 });
-courseSchema.index({ instructorId: 1 });
-
 const Course = mongoose.model("Course", courseSchema);
 
 module.exports = Course;
