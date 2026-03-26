@@ -33,7 +33,7 @@ const assignmentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["open", "closed", "overdue"],
+      enum: ["open", "closed", "overdue", "completed"],
       default: "open",
     },
     points: {

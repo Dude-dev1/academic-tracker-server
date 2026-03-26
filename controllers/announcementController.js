@@ -56,3 +56,31 @@ exports.deleteAnnouncement = asyncHandler(async (req, res) => {
     data: {},
   });
 });
+
+// @desc    Update announcement
+// @route   PUT /api/announcements/:id
+// @access  Private (instructor only)
+exports.updateAnnouncement = asyncHandler(async (req, res) => {
+  let announcement = await Announcement.findById(req.params.id);
+
+  if (!announcement) {
+    res.status(404);
+    throw new Error("Announcement not found");
+  }
+
+  // Make sure user is the author or admin
+  if (announcement.userId.toString() !== req.user.id && req.user.role !== "admin") {
+    res.status(403);
+    throw new Error("Not authorized to update this announcement");
+  }
+
+  announcement = await Announcement.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: announcement,
+  });
+});

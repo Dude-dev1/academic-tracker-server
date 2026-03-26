@@ -4,12 +4,13 @@ const {
   getAnnouncements,
   createAnnouncement,
   deleteAnnouncement,
+  updateAnnouncement,
 } = require("../controllers/announcementController");
 const { protect } = require("../middleware/auth");
 
 router.use(protect);
 
 router.route("/").get(getAnnouncements).post(createAnnouncement);
-router.route("/:id").delete(deleteAnnouncement);
+router.route("/:id").put(updateAnnouncement).delete(deleteAnnouncement);
 
 module.exports = router;

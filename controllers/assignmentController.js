@@ -172,17 +172,27 @@ exports.updateAssignment = async (req, res) => {
     }
 
     if (assignment.courseId && assignment.courseId.instructorId.toString() !== req.user.id && req.user.role !== "admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Only the course instructor can update assignments",
-      });
+      // Allow students to only update their status for class assignments
+      if (Object.keys(req.body).length !== 1 || !req.body.status) {
+        return res.status(403).json({
+          success: false,
+          message: "Only the course instructor can update assignment details",
+        });
+      }
     }
 
-    const { title, description, dueDate, points, group, status } = req.body;
+    // Only update fields that are provided
+    const updateData = {};
+    const allowedFields = ['title', 'description', 'dueDate', 'points', 'group', 'status'];
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
 
     assignment = await Assignment.findByIdAndUpdate(
       req.params.id,
-      { title, description, dueDate, points, group, status },
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 
@@ -219,10 +229,13 @@ exports.deleteAssignment = async (req, res) => {
     }
 
     if (assignment.courseId && assignment.courseId.instructorId.toString() !== req.user.id && req.user.role !== "admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Only the course instructor can delete course assignments",
-      });
+      // Allow students to only update their status for class assignments
+      if (Object.keys(req.body).length !== 1 || !req.body.status) {
+        return res.status(403).json({
+          success: false,
+          message: "Only the course instructor can update assignment details",
+        });
+      }
     }
 
     await Assignment.findByIdAndDelete(req.params.id);
