@@ -33,7 +33,8 @@ exports.createAssignment = async (req, res) => {
       userId: courseId ? undefined : req.user.id,
       points: points || 100,
       group: group || "All",
-      status: "open"
+      status: "open",
+      attachmentUrl: req.file ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` : null
     });
 
     res.status(201).json({
@@ -184,6 +185,9 @@ exports.updateAssignment = async (req, res) => {
     // Only update fields that are provided
     const updateData = {};
     const allowedFields = ['title', 'description', 'dueDate', 'points', 'group', 'status'];
+    if (req.file) {
+      updateData.attachmentUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    }
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
         updateData[field] = req.body[field];

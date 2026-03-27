@@ -8,6 +8,7 @@ const {
   deleteAssignment,
 } = require("../controllers/assignmentController");
 const { protect, instructorOnly } = require("../middleware/auth");
+const upload = require("../middleware/upload");
 
 // All routes require authentication
 router.use(protect);
@@ -15,7 +16,7 @@ router.use(protect);
 // @route   POST /api/assignments
 // @desc    Create a new assignment
 // @access  Private
-router.post("/", createAssignment);
+router.post("/", upload.single("attachment"), createAssignment);
 
 // @route   GET /api/assignments
 // @desc    Get all assignments
@@ -30,7 +31,7 @@ router.get("/:id", getAssignment);
 // @route   PUT /api/assignments/:id
 // @desc    Update assignment
 // @access  Private
-router.put("/:id", updateAssignment);
+router.put("/:id", upload.single("attachment"), updateAssignment);
 
 // @route   DELETE /api/assignments/:id
 // @desc    Delete assignment

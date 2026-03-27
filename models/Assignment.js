@@ -36,6 +36,10 @@ const assignmentSchema = new mongoose.Schema(
       enum: ["open", "closed", "overdue", "completed"],
       default: "open",
     },
+    attachmentUrl: {
+      type: String,
+      default: null,
+    },
     points: {
       type: Number,
       default: 100,
