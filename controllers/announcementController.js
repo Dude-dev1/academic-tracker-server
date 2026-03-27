@@ -44,7 +44,11 @@ exports.deleteAnnouncement = asyncHandler(async (req, res) => {
     throw new Error("Announcement not found");
   }
 
-  if (announcement.userId.toString() !== req.user.id && req.user.role !== "admin") {
+  if (
+    announcement.userId.toString() !== req.user.id &&
+    req.user.role !== "admin" &&
+    req.user.role !== "instructor"
+  ) {
     res.status(403);
     throw new Error("Not authorized to delete this announcement");
   }
@@ -68,8 +72,12 @@ exports.updateAnnouncement = asyncHandler(async (req, res) => {
     throw new Error("Announcement not found");
   }
 
-  // Make sure user is the author or admin
-  if (announcement.userId.toString() !== req.user.id && req.user.role !== "admin") {
+  // Make sure user is the author, admin, or instructor
+  if (
+    announcement.userId.toString() !== req.user.id &&
+    req.user.role !== "admin" &&
+    req.user.role !== "instructor"
+  ) {
     res.status(403);
     throw new Error("Not authorized to update this announcement");
   }
