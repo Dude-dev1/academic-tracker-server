@@ -38,7 +38,7 @@ exports.createAssignment = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      data: assignment.toJSON(),
+      data: assignment,
     });
   } catch (error) {
     res.status(500).json({
@@ -92,7 +92,7 @@ exports.getAssignments = async (req, res) => {
     res.status(200).json({
       success: true,
       count: assignments.length,
-      data: assignments.map((a) => a.toJSON()),
+      data: assignments.map((a) => a),
     });
   } catch (error) {
     res.status(500).json({
@@ -141,7 +141,7 @@ exports.getAssignment = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: assignment.toJSON(),
+      data: assignment,
     });
   } catch (error) {
     res.status(500).json({
@@ -198,7 +198,7 @@ exports.updateAssignment = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: assignment.toJSON(),
+      data: assignment,
     });
   } catch (error) {
     res.status(500).json({

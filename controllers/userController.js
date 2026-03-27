@@ -17,7 +17,7 @@ exports.getUser = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: user.toJSON(),
+      data: user,
     });
   } catch (error) {
     res.status(500).json({
@@ -52,7 +52,7 @@ exports.updateProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: user.toJSON(),
+      data: user,
     });
   } catch (error) {
     res.status(500).json({

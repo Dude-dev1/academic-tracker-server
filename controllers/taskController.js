@@ -26,7 +26,7 @@ exports.createTask = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      data: task.toJSON(),
+      data: task,
     });
   } catch (error) {
     res.status(500).json({
@@ -54,7 +54,7 @@ exports.getTasks = async (req, res) => {
     res.status(200).json({
       success: true,
       count: tasks.length,
-      data: tasks.map((t) => t.toJSON()),
+      data: tasks.map((t) => t),
     });
   } catch (error) {
     res.status(500).json({
@@ -88,7 +88,7 @@ exports.getTask = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: task.toJSON(),
+      data: task,
     });
   } catch (error) {
     res.status(500).json({
@@ -132,7 +132,7 @@ exports.updateTask = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: task.toJSON(),
+      data: task,
     });
   } catch (error) {
     res.status(500).json({
@@ -212,8 +212,8 @@ exports.completeTask = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Task completed successfully",
-      data: task.toJSON(),
-      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge.toJSON()),
+      data: task,
+      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge),
     });
   } catch (error) {
     res.status(500).json({

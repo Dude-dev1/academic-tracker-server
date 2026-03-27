@@ -50,7 +50,7 @@ exports.awardBadge = async (req, res) => {
       success: true,
       message: "Badge awarded successfully",
       data: {
-        badge: badge.toJSON(),
+        badge: badge,
         user: {
           id: user.id,
           name: user.name,
@@ -85,7 +85,7 @@ exports.getUserBadges = async (req, res) => {
     res.status(200).json({
       success: true,
       count: user.badges.length,
-      data: user.badges.map((badge) => badge.toJSON()),
+      data: user.badges.map((badge) => badge),
     });
   } catch (error) {
     res.status(500).json({
@@ -105,7 +105,7 @@ exports.getAllBadges = async (req, res) => {
     res.status(200).json({
       success: true,
       count: badges.length,
-      data: badges.map((badge) => badge.toJSON()),
+      data: badges.map((badge) => badge),
     });
   } catch (error) {
     res.status(500).json({

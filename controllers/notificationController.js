@@ -20,7 +20,7 @@ exports.getNotifications = async (req, res) => {
     res.status(200).json({
       success: true,
       count: notifications.length,
-      data: notifications.map((n) => n.toJSON()),
+      data: notifications.map((n) => n),
     });
   } catch (error) {
     res.status(500).json({
@@ -57,7 +57,7 @@ exports.markAsRead = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: notification.toJSON(),
+      data: notification,
     });
   } catch (error) {
     res.status(500).json({

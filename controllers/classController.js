@@ -60,7 +60,7 @@ exports.createClass = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      data: createdClass.toJSON(),
+      data: createdClass,
     });
   } catch (error) {
     res.status(500).json({
@@ -94,7 +94,7 @@ exports.getClasses = async (req, res) => {
       success: true,
       count: classes.length,
       data: classes.map((c) => {
-        const classObj = c.toJSON();
+        const classObj = c;
         classObj.instructorId = c.instructorId?.id || c.instructorId;
         return classObj;
       }),
@@ -138,7 +138,7 @@ exports.getClass = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: classItem.toJSON(),
+      data: classItem,
     });
   } catch (error) {
     res.status(500).json({
@@ -180,7 +180,7 @@ exports.updateClass = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: classItem.toJSON(),
+      data: classItem,
     });
   } catch (error) {
     res.status(500).json({
@@ -272,8 +272,8 @@ exports.joinClass = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Joined class successfully",
-      data: classItem.toJSON(),
-      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge.toJSON()),
+      data: classItem,
+      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge),
     });
   } catch (error) {
     res.status(500).json({
@@ -325,8 +325,8 @@ exports.joinClassByCode = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Joined class successfully",
-      data: classItem.toJSON(),
-      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge.toJSON()),
+      data: classItem,
+      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge),
     });
   } catch (error) {
     res.status(500).json({
@@ -378,7 +378,7 @@ exports.leaveClass = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Left class successfully",
-      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge.toJSON()),
+      newlyEarnedBadges: newlyEarnedBadges.map((badge) => badge),
     });
   } catch (error) {
     res.status(500).json({

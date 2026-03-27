@@ -25,7 +25,7 @@ const sendTokenResponse = (user, statusCode, res) => {
   res.status(statusCode).cookie("token", token, options).json({
     success: true,
     token,
-    user: user.toJSON(),
+    user: user,
   });
 };
 
@@ -135,7 +135,7 @@ exports.getMe = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user: user.toJSON(),
+      user: user,
     });
   } catch (error) {
     res.status(500).json({
@@ -168,7 +168,7 @@ exports.updateProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user: user.toJSON(),
+      user: user,
     });
   } catch (error) {
     res.status(500).json({
