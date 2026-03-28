@@ -5,7 +5,9 @@ const asyncHandler = require("../utils/asyncHandler");
 // @route   GET /api/calendar-events
 // @access  Private
 exports.getEvents = asyncHandler(async (req, res) => {
-  const events = await CalendarEvent.find({ userId: req.user._id });
+  const events = await CalendarEvent.find({ 
+    $or: [{ userId: req.user._id }, { isClass: true }] 
+  });
 
   res.status(200).json({
     success: true,
@@ -18,6 +20,10 @@ exports.getEvents = asyncHandler(async (req, res) => {
 // @route   POST /api/calendar-events
 // @access  Private
 exports.createEvent = asyncHandler(async (req, res) => {
+  if (req.body.isClass && req.user.role !== "instructor" && req.user.role !== "admin") {
+    return res.status(403).json({ success: false, message: "Only instructors can create class events" });
+  }
+
   req.body.userId = req.user._id;
 
   const event = await CalendarEvent.create(req.body);
@@ -36,6 +42,10 @@ exports.updateEvent = asyncHandler(async (req, res) => {
 
   if (!event) {
     return res.status(404).json({ success: false, message: "Event not found" });
+  }
+
+  if (req.body.isClass && req.user.role !== "instructor" && req.user.role !== "admin") {
+    return res.status(403).json({ success: false, message: "Only instructors can update class events" });
   }
 
   // Make sure user owns event
