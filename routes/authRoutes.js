@@ -7,6 +7,7 @@ const {
   getMe,
   logout,
   updateProfile,
+  subscribeNewsletter,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/auth");
 
@@ -14,6 +15,11 @@ const { protect } = require("../middleware/auth");
 // @route   POST /api/auth/register
 // @access  Public
 router.post("/register", register);
+
+// @desc    Subscribe to newsletter
+// @route   POST /api/auth/newsletter
+// @access  Public
+router.post("/newsletter", subscribeNewsletter);
 
 // @desc    Login user
 // @route   POST /api/auth/login

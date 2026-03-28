@@ -114,7 +114,7 @@ const sendWelcomeEmail = async (user) => {
           <h2>Welcome, ${user.name}!</h2>
           <p>Thank you for signing up for Agenda, your new learning management experience.</p>
           <p>We're excited to have you on board. You can now log in to view your classes, check your schedule, and stay on top of your assignments.</p>
-          <a href="#" class="button">Get Started</a>
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" class="button">Get Started</a>
         </div>
         <div class="footer">
           <p>&copy; ${new Date().getFullYear()} Agenda. All rights reserved.</p>
@@ -193,9 +193,36 @@ const sendAssignmentEmail = async (users, assignment) => {
   return sendEmail({ bcc: emails, subject, html });
 };
 
+const sendNewsletterConfirmationEmail = async (email) => {
+  const subject = "Subscribed to Agenda Newsletter!";
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>${emailStyles}</head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Agenda</h1>
+        </div>
+        <div class="content">
+          <h2>You're Subscribed!</h2>
+          <p>Thank you for subscribing to the Agenda newsletter.</p>
+          <p>We will keep you updated with the latest news, features, and educational insights.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} Agenda. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  return sendEmail({ to: email, subject, html });
+};
+
 module.exports = {
   sendEmail,
   sendWelcomeEmail,
   sendAnnouncementEmail,
-  sendAssignmentEmail
+  sendAssignmentEmail,
+  sendNewsletterConfirmationEmail
 };

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
-const { sendWelcomeEmail } = require("../utils/emailService");
+const { sendWelcomeEmail, sendNewsletterConfirmationEmail } = require("../utils/emailService");
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -195,4 +195,29 @@ exports.logout = async (req, res) => {
     success: true,
     message: "Logged out successfully",
   });
+};
+
+// @desc    Subscribe to newsletter
+// @route   POST /api/auth/newsletter
+// @access  Public
+exports.subscribeNewsletter = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Please provide an email" });
+    }
+    
+    // Asynchronously send the confirmation email
+    sendNewsletterConfirmationEmail(email);
+
+    res.status(200).json({
+      success: true,
+      message: "Subscribed successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
