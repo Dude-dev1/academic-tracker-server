@@ -219,14 +219,6 @@ const sendNewsletterConfirmationEmail = async (email) => {
   return sendEmail({ to: email, subject, html });
 };
 
-module.exports = {
-  sendEmail,
-  sendWelcomeEmail,
-  sendAnnouncementEmail,
-  sendAssignmentEmail,
-  sendNewsletterConfirmationEmail,
-  sendClassInviteEmail
-};
 const sendClassInviteEmail = async (email, className, classCode, inviterName) => {
   const subject = `You have been invited to join ${className}`;
   const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/join/${classCode}`;
@@ -253,4 +245,13 @@ const sendClassInviteEmail = async (email, className, classCode, inviterName) =>
     </html>
   `;
   return sendEmail({ to: email, subject, html });
+};
+
+module.exports = {
+  sendEmail,
+  sendWelcomeEmail,
+  sendAnnouncementEmail,
+  sendAssignmentEmail,
+  sendNewsletterConfirmationEmail,
+  sendClassInviteEmail
 };

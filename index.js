@@ -94,7 +94,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 // Initialize Passport
 app.use(passport.initialize());
