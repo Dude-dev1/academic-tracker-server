@@ -224,5 +224,33 @@ module.exports = {
   sendWelcomeEmail,
   sendAnnouncementEmail,
   sendAssignmentEmail,
-  sendNewsletterConfirmationEmail
+  sendNewsletterConfirmationEmail,
+  sendClassInviteEmail
+};
+const sendClassInviteEmail = async (email, className, classCode, inviterName) => {
+  const subject = `You have been invited to join ${className}`;
+  const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/join/${classCode}`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>${emailStyles}</head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Agenda</h1>
+        </div>
+        <div class="content">
+          <h2>Class Invitation</h2>
+          <p>${inviterName} has invited you to join the class: <strong>${className}</strong>.</p>
+          <p>Please click the button below to accept the invitation and join the class.</p>
+          <a href="${inviteLink}" class="button">Accept Class Invite</a>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} Agenda. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  return sendEmail({ to: email, subject, html });
 };

@@ -410,31 +410,15 @@ exports.addMember = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized to manage members in this class" });
     }
 
-    // Find the user to add
-    const userToAdd = await User.findOne({ email });
+    const { sendClassInviteEmail } = require('../utils/emailService');
+    const instructor = await User.findById(req.user.id);
     
-    if (!userToAdd) {
-      return res.status(404).json({ success: false, message: "User with this email not found" });
-    }
-
-    // Check if already a member
-    if (classItem.members.includes(userToAdd._id)) {
-      return res.status(400).json({ success: false, message: "User is already a member of this class" });
-    }
-
-    // Add user to class members
-    classItem.members.push(userToAdd._id);
-    await classItem.save();
-
-    // Add class to user's classes
-    if (!userToAdd.classes.includes(classItem._id)) {
-      userToAdd.classes.push(classItem._id);
-      await userToAdd.save();
-    }
+    // Always send an invite email, whether they are registered or not
+    await sendClassInviteEmail(email, classItem.name, classItem.code, instructor.name || instructor.email);
 
     res.status(200).json({
       success: true,
-      message: "Student added successfully"
+      message: `Invitation email sent successfully to ${email}`
     });
   } catch (error) {
     res.status(500).json({
