@@ -388,6 +388,62 @@ exports.leaveClass = async (req, res) => {
   }
 };
 
+// @desc    Add a member to class manually by instructor
+// @route   POST /api/classes/:id/members
+// @access  Private (instructor only)
+exports.addMember = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Please provide an email to add" });
+    }
+
+    const classItem = await Class.findById(req.params.id);
+
+    if (!classItem) {
+      return res.status(404).json({ success: false, message: "Class not found" });
+    }
+
+    // Check if user is the instructor
+    if (classItem.instructorId.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Not authorized to manage members in this class" });
+    }
+
+    // Find the user to add
+    const userToAdd = await User.findOne({ email });
+    
+    if (!userToAdd) {
+      return res.status(404).json({ success: false, message: "User with this email not found" });
+    }
+
+    // Check if already a member
+    if (classItem.members.includes(userToAdd._id)) {
+      return res.status(400).json({ success: false, message: "User is already a member of this class" });
+    }
+
+    // Add user to class members
+    classItem.members.push(userToAdd._id);
+    await classItem.save();
+
+    // Add class to user's classes
+    if (!userToAdd.classes.includes(classItem._id)) {
+      userToAdd.classes.push(classItem._id);
+      await userToAdd.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Student added successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // @desc    Get all members of a class
 // @route   GET /api/classes/:id/members
 // @access  Private

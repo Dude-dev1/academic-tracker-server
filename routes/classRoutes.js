@@ -10,6 +10,7 @@ const {
   joinClassByCode,
   leaveClass,
   getMembers,
+  addMember,
   removeMember,
 } = require("../controllers/classController");
 const { protect, instructorOnly } = require("../middleware/auth");
@@ -61,6 +62,11 @@ router.post("/:id/join", joinClass);
 // @desc    Leave a class
 // @access  Private
 router.post("/:id/leave", leaveClass);
+
+// @route   POST /api/classes/:id/members
+// @desc    Add a member to class manually
+// @access  Private (instructor only)
+router.post("/:id/members", instructorOnly, addMember);
 
 // @route   DELETE /api/classes/:id/members/:userId
 // @desc    Remove a member from class
