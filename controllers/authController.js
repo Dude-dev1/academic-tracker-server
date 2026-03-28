@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const { sendWelcomeEmail } = require("../utils/emailService");
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -64,6 +65,9 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role: role || "student",
     });
+
+    // Send welcome email asynchronously
+    sendWelcomeEmail(user);
 
     sendTokenResponse(user, 201, res);
   } catch (error) {

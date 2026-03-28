@@ -2,6 +2,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const User = require("../models/User");
+const { sendWelcomeEmail } = require("../utils/emailService");
 
 module.exports = function (passport) {
   // Google OAuth Strategy
@@ -47,6 +48,10 @@ module.exports = function (passport) {
           });
 
           await newUser.save();
+          
+          // Send welcome email asymptotically
+          sendWelcomeEmail(newUser);
+
           return done(null, newUser);
         } catch (error) {
           return done(error, null);

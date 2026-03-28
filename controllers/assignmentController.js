@@ -1,5 +1,7 @@
 const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
+const User = require("../models/User");
+const { sendAssignmentEmail } = require("../utils/emailService");
 
 // @desc    Create a new assignment
 // @route   POST /api/assignments
@@ -36,6 +38,14 @@ exports.createAssignment = async (req, res) => {
       status: "open",
       attachmentUrl: req.file ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` : null
     });
+
+    // Send email to students if it's a course assignment
+    if (courseId) {
+      const students = await User.find({ role: "student" }).select("email");
+      if (students.length > 0) {
+        sendAssignmentEmail(students, assignment);
+      }
+    }
 
     res.status(201).json({
       success: true,

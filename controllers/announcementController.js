@@ -1,5 +1,7 @@
 const Announcement = require("../models/Announcement");
+const User = require("../models/User");
 const asyncHandler = require("../utils/asyncHandler");
+const { sendAnnouncementEmail } = require("../utils/emailService");
 
 // @desc    Get all announcements
 // @route   GET /api/announcements
@@ -26,6 +28,15 @@ exports.createAnnouncement = asyncHandler(async (req, res) => {
   }
 
   const announcement = await Announcement.create(req.body);
+
+  // Send email to all students
+  const students = await User.find({ role: "student" }).select("email");
+  if (students.length > 0) {
+    sendAnnouncementEmail(students, {
+      title: announcement.title,
+      content: announcement.body,
+    });
+  }
 
   res.status(201).json({
     success: true,
