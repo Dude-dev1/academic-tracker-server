@@ -30,6 +30,10 @@ const classSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

@@ -516,3 +516,49 @@ exports.removeMember = async (req, res) => {
     });
   }
 };
+
+exports.regenerateCode = async (req, res) => {
+  try {
+    const classItem = await Class.findById(req.params.id);
+    if (!classItem) {
+      return res.status(404).json({ success: false, message: "Class not found" });
+    }
+    if (classItem.instructorId.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Only the instructor can regenerate the class code" });
+    }
+
+    let newCode;
+    let isUnique = false;
+    while (!isUnique) {
+      newCode = generateClassCode();
+      const existingClass = await Class.findOne({ code: newCode });
+      if (!existingClass) isUnique = true;
+    }
+
+    classItem.code = newCode;
+    await classItem.save();
+
+    res.status(200).json({ success: true, message: "Class code regenerated", data: classItem });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.archiveClass = async (req, res) => {
+  try {
+    const classItem = await Class.findById(req.params.id);
+    if (!classItem) {
+      return res.status(404).json({ success: false, message: "Class not found" });
+    }
+    if (classItem.instructorId.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Only the instructor can archive this class" });
+    }
+
+    classItem.isArchived = !classItem.isArchived;
+    await classItem.save();
+
+    res.status(200).json({ success: true, message: `Class ${classItem.isArchived ? "archived" : "unarchived"} successfully`, data: classItem });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

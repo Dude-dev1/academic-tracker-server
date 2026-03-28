@@ -12,6 +12,8 @@ const {
   getMembers,
   addMember,
   removeMember,
+  regenerateCode,
+  archiveClass,
 } = require("../controllers/classController");
 const { protect, instructorOnly } = require("../middleware/auth");
 
@@ -72,5 +74,15 @@ router.post("/:id/members", instructorOnly, addMember);
 // @desc    Remove a member from class
 // @access  Private (instructor only)
 router.delete("/:id/members/:userId", instructorOnly, removeMember);
+
+// @route   PUT /api/classes/:id/regenerate
+// @desc    Regenerate Class Code
+// @access  Private (instructor only)
+router.put("/:id/regenerate", instructorOnly, regenerateCode);
+
+// @route   PUT /api/classes/:id/archive
+// @desc    Archive Class
+// @access  Private (instructor only)
+router.put("/:id/archive", instructorOnly, archiveClass);
 
 module.exports = router;
