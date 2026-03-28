@@ -156,6 +156,7 @@ exports.updateProfile = async (req, res) => {
   try {
     const fieldsToUpdate = {
       name: req.body.name,
+      email: req.body.email,
       avatar: req.body.avatar,
       role: req.body.role,
     };
