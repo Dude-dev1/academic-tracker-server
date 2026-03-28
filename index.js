@@ -79,12 +79,22 @@ if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -128,10 +138,7 @@ const PORT = process.env.PORT || 5000;
 // Create HTTP server and Socket.IO instance
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: {
-    origin: allowedOrigins,
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 
 // Store active connections
