@@ -62,4 +62,22 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+// @desc    Delete own profile
+// @route   DELETE /api/users/me
+// @access  Private
+exports.deleteAccount = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.user.id);
+    res.status(200).json({
+      success: true,
+      message: "Account deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = exports;

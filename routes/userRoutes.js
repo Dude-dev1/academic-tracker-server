@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getUser, updateProfile } = require("../controllers/userController");
+const { getUser, updateProfile, deleteAccount } = require("../controllers/userController");
 const { protect } = require("../middleware/auth");
 
 // @desc    Get public profile
@@ -12,5 +12,10 @@ router.get("/:id", getUser);
 // @route   PATCH /api/users/me
 // @access  Private
 router.patch("/me", protect, updateProfile);
+
+// @desc    Delete own profile
+// @route   DELETE /api/users/me
+// @access  Private
+router.delete("/me", protect, deleteAccount);
 
 module.exports = router;
