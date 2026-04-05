@@ -52,6 +52,20 @@ const userSchema = new mongoose.Schema(
         ref: "Badge",
       },
     ],
+    notifications: {
+      email: {
+        type: Boolean,
+        default: true
+      },
+      push: {
+        type: Boolean,
+        default: false
+      },
+      updates: {
+        type: Boolean,
+        default: true
+      }
+    }
   },
   {
     timestamps: true,

@@ -161,6 +161,10 @@ exports.updateProfile = async (req, res) => {
       role: req.body.role,
     };
 
+    if (req.body.notifications) {
+      fieldsToUpdate.notifications = req.body.notifications;
+    }
+
     // Remove undefined fields
     Object.keys(fieldsToUpdate).forEach(
       (key) => fieldsToUpdate[key] === undefined && delete fieldsToUpdate[key]
