@@ -193,6 +193,41 @@ const sendAssignmentEmail = async (users, assignment) => {
   return sendEmail({ bcc: emails, subject, html });
 };
 
+const sendCalendarEventEmail = async (users, event) => {
+  if (!users || users.length === 0) return;
+  
+  const emails = users.map(u => u.email).join(', ');
+  const subject = `Agenda: New Event - ${event.title}`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>${emailStyles}</head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Agenda</h1>
+        </div>
+        <div class="content">
+          <h2>New Calendar Event</h2>
+          <div class="card">
+            <h3 style="margin-top: 0; color: #2b6296;">${event.title}</h3>
+            <p><strong>Description:</strong> ${event.description || 'No description provided.'}</p>
+            <p style="margin-bottom: 0;"><strong>Start:</strong> ${new Date(event.start).toLocaleString()}</p>
+            ${event.end ? `<p style="margin-bottom: 0; margin-top: 5px;"><strong>End:</strong> ${new Date(event.end).toLocaleString()}</p>` : ''}
+          </div>
+          <p>Please check your calendar for more details.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} Agenda. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  return sendEmail({ bcc: emails, subject, html });
+};
+
 const sendNewsletterConfirmationEmail = async (email) => {
   const subject = "Subscribed to Agenda Newsletter!";
   const html = `
@@ -252,6 +287,7 @@ module.exports = {
   sendWelcomeEmail,
   sendAnnouncementEmail,
   sendAssignmentEmail,
+  sendCalendarEventEmail,
   sendNewsletterConfirmationEmail,
   sendClassInviteEmail
 };

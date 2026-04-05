@@ -1,5 +1,7 @@
 const CalendarEvent = require("../models/CalendarEvent");
+const User = require("../models/User");
 const asyncHandler = require("../utils/asyncHandler");
+const { sendCalendarEventEmail } = require("../utils/emailService");
 
 // @desc    Get all calendar events for user
 // @route   GET /api/calendar-events
@@ -27,6 +29,16 @@ exports.createEvent = asyncHandler(async (req, res) => {
   req.body.userId = req.user._id;
 
   const event = await CalendarEvent.create(req.body);
+
+  if (req.body.isClass) {
+    const students = await User.find({ 
+      role: "student",
+      "notifications.email": { $ne: false }
+    }).select("email");
+    if (students.length > 0) {
+      sendCalendarEventEmail(students, event);
+    }
+  }
 
   res.status(201).json({
     success: true,

@@ -41,7 +41,10 @@ exports.createAssignment = async (req, res) => {
 
     // Send email to students if it's a course assignment
     if (courseId) {
-      const students = await User.find({ role: "student" }).select("email");
+      const students = await User.find({ 
+        role: "student",
+        "notifications.email": { $ne: false } // Match true or undefined/missing
+      }).select("email");
       if (students.length > 0) {
         sendAssignmentEmail(students, assignment);
       }

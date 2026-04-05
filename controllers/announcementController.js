@@ -29,8 +29,12 @@ exports.createAnnouncement = asyncHandler(async (req, res) => {
 
   const announcement = await Announcement.create(req.body);
 
-  // Send email to all students
-  const students = await User.find({ role: "student" }).select("email");
+  // Send email to all students with email notifications enabled
+  const students = await User.find({ 
+    role: "student",
+    "notifications.email": { $ne: false } // Match true or undefined/missing
+  }).select("email");
+  
   if (students.length > 0) {
     sendAnnouncementEmail(students, {
       title: announcement.title,
