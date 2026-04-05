@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { getUser, updateProfile, deleteAccount } = require("../controllers/userController");
+const {
+  getUser,
+  updateProfile,
+  deleteAccount,
+} = require("../controllers/userController");
 const { protect } = require("../middleware/auth");
 
 // @desc    Get public profile
